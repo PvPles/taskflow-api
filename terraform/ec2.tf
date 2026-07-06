@@ -46,6 +46,7 @@ resource "aws_instance" "api" {
   root_block_device {
     volume_size = 16
     volume_type = "gp3"
+    encrypted   = true
   }
 
   metadata_options {

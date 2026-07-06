@@ -1,7 +1,31 @@
+from app.db.session import get_db
+from app.main import app
+
+
 def test_health_returns_ok(client):
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_ready_returns_ok_when_db_reachable(client):
+    response = client.get("/health/ready")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+
+
+def test_ready_returns_503_when_db_down(client):
+    class BrokenSession:
+        def execute(self, *args, **kwargs):
+            raise RuntimeError("database is gone")
+
+    def broken_db():
+        yield BrokenSession()
+
+    app.dependency_overrides[get_db] = broken_db
+    response = client.get("/health/ready")
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "not_ready"
 
 
 def test_every_response_carries_a_request_id(client):

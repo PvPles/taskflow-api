@@ -1,13 +1,16 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.api.routes.auth import router as auth_router
 from app.api.routes.comments import router as comments_router
 from app.api.routes.projects import router as projects_router
 from app.api.routes.tasks import router as tasks_router
 from app.core.config import get_settings
-from app.core.errors import register_exception_handlers
+from app.core.errors import APIError, register_exception_handlers
 from app.core.logging import setup_logging
 from app.core.ratelimit import RateLimitMiddleware
+from app.db.session import get_db
 from app.middleware import RequestContextMiddleware
 
 
@@ -31,7 +34,17 @@ def create_app() -> FastAPI:
 
     @app.get("/health", tags=["ops"])
     def health():
+        """Liveness: is the process up? Used by the ALB target group."""
         return {"status": "ok"}
+
+    @app.get("/health/ready", tags=["ops"])
+    def ready(db: Session = Depends(get_db)):
+        """Readiness: can we actually serve traffic (database reachable)?"""
+        try:
+            db.execute(text("SELECT 1"))
+        except Exception as exc:
+            raise APIError(503, "not_ready", "Database is unreachable") from exc
+        return {"status": "ready"}
 
     return app
 

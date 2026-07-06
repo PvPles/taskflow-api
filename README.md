@@ -147,7 +147,8 @@ pytest
 | GET/PATCH/DELETE | /api/v1/tasks/{id} | Status transitions validated; DELETE = creator or owner 🔒 |
 | POST/GET | /api/v1/tasks/{id}/comments | Any member 🔒 |
 | DELETE | /api/v1/comments/{id} | Author or project owner 🔒 |
-| GET | /health | Liveness probe (rate-limit exempt) |
+| GET | /health | Liveness probe — is the process up (ALB health check) |
+| GET | /health/ready | Readiness probe — is the database reachable (503 if not) |
 
 Task-list pagination: response is `{ "items": [...], "next_cursor": "..." }`.
 Pass `cursor` back to get the next page; `next_cursor: null` means the end.
@@ -192,13 +193,39 @@ seeks via an index instead of counting offset rows.
 - [ ] **Week 5 — Ship**: `terraform apply` with real AWS credentials, smoke
   tests against the live ALB, record the live URL + screenshots here
 
-## Deployment
+## Deployment & operations
 
 All infrastructure is in [terraform/](terraform/) — VPC, security groups, EC2
-(running the GHCR image via Docker), ALB with `/health` checks, optional
-ACM/HTTPS, CloudWatch logs. See [terraform/README.md](terraform/README.md) for
-the apply/destroy walkthrough and the decision log (why no NAT gateway, why
-Dockerized Postgres instead of RDS).
+(running the GHCR image via Docker as a non-root user, IMDSv2 enforced,
+encrypted EBS), ALB with `/health` checks, optional ACM/HTTPS, CloudWatch
+logs. See [terraform/README.md](terraform/README.md) for the apply/destroy
+walkthrough and the decision log (why no NAT gateway, why Dockerized Postgres
+instead of RDS, remote-state setup).
+
+Day-2 operations are part of the Terraform stack too:
+
+- **CloudWatch dashboard** (`taskflow`): request rate, p95 latency, 4xx/5xx,
+  instance CPU
+- **Alarms**: ALB 5xx spike, target failing health checks, sustained high CPU —
+  wired to an SNS email topic when `alert_email` is set
+- **AWS Budget**: emails at 80% of $10/month, so a forgotten demo can't
+  surprise-bill anyone
+- **Post-deploy smoke test**: `python scripts/smoke.py http://<alb-dns>` runs
+  the critical user journey (health, register, login, task lifecycle including
+  the forbidden transition) against the live deployment and exits non-zero on
+  failure
+- **Dependabot** keeps pip, Docker, GitHub Actions, and Terraform providers
+  patched weekly; CI validates `terraform fmt`/`validate` on every push
+
+## What this project demonstrates
+
+| Area | Evidence |
+| --- | --- |
+| API security | Argon2 password hashing, 15-min JWTs, hashed + single-use refresh tokens, rotation with reuse detection, generic auth errors (no user enumeration), 404-over-403 for outsiders |
+| Data engineering | Incremental Alembic migrations (0001–0004), keyset cursor pagination with a backing index, portable types tested on SQLite *and* Postgres |
+| Production discipline | Structured JSON logs with request IDs, consistent error envelope, per-user rate limiting, liveness vs readiness probes, 70% coverage gate with integration tests in CI |
+| AWS / IaC | Everything in Terraform (no console clicking), least-privilege IAM, IMDSv2, encrypted EBS, security-group-to-security-group rules, ACM DNS validation, CloudWatch logs/alarms/dashboard, budget guardrail, documented cost trade-offs |
+| Delivery | CI: lint → tests on real Postgres → image published to GHCR; the EC2 instance runs the exact image CI tested; Dependabot; post-deploy smoke test |
 
 ## Cost note
 

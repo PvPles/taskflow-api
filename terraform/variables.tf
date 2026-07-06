@@ -28,6 +28,12 @@ variable "route53_zone_id" {
   default     = ""
 }
 
+variable "alert_email" {
+  description = "Email for CloudWatch alarm + budget notifications. Empty = alarms exist but notify nobody."
+  type        = string
+  default     = ""
+}
+
 variable "ssh_key_name" {
   description = "EC2 key pair name for SSH access. Empty = no SSH."
   type        = string
