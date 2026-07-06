@@ -17,6 +17,8 @@ Client ──HTTPS──▶ ALB (ACM cert) ──▶ EC2: Docker(api + postgres)
 | `acm.tf` | TLS cert + DNS validation (only when `domain_name` is set) |
 | `cloudwatch.tf` | Log group — the API's JSON logs ship via Docker's awslogs driver |
 | `iam.tf` | Instance role: CloudWatch Logs write access, nothing more |
+| `monitoring.tf` | Dashboard, 5xx/health/CPU alarms (SNS email optional), $10 budget alert |
+| `backend.hcl.example` | Remote state (S3 + DynamoDB locking) bootstrap instructions |
 
 ## Deploy
 
@@ -42,8 +44,9 @@ With `domain_name` + `route53_zone_id` set you get ACM + HTTPS + redirect.
 terraform destroy
 ```
 
-Stops all billing. State is local (fine for a single-person portfolio project;
-a team would use an S3 backend with state locking).
+Stops all billing. State is local by default (fine for a single-person
+portfolio project); `backend.hcl.example` documents the S3 + DynamoDB
+remote-state setup a team would use.
 
 ## Cost (eu-central-1, 2026 prices, rough)
 

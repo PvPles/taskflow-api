@@ -16,7 +16,7 @@ from app.core.config import get_settings
 from app.core.errors import error_response
 from app.core.security import decode_access_token
 
-EXEMPT_PATHS = {"/health", "/docs", "/redoc", "/openapi.json"}
+EXEMPT_PATHS = {"/health", "/health/ready", "/docs", "/redoc", "/openapi.json"}
 
 
 class TokenBucket:
