@@ -1,10 +1,8 @@
-"""Cursor-based pagination for task lists.
+"""Keyset pagination for task lists.
 
-A cursor is the (created_at, id) of the last item on the previous page,
-base64-encoded. Unlike offset pagination it stays correct when rows are
-inserted or deleted between page fetches, and the DB can seek straight to
-the position via the (project_id, created_at, id) index instead of counting
-skipped rows.
+The cursor encodes the (created_at, id) of the previous page's last row.
+Keyset paging avoids OFFSET's drift under concurrent writes and its scan
+cost, and is served directly by the (project_id, created_at, id) index.
 """
 
 import base64

@@ -35,7 +35,7 @@ def register_user(db: Session, email: str, password: str, display_name: str) -> 
 
 def authenticate_user(db: Session, email: str, password: str) -> User:
     user = db.scalar(select(User).where(User.email == email.strip().lower()))
-    # Same error for unknown email and wrong password - don't leak which.
+    # Identical response for unknown email and bad password (no enumeration).
     if user is None or not verify_password(password, user.password_hash):
         raise APIError(401, "invalid_credentials", "Invalid email or password")
     if not user.is_active:
@@ -59,11 +59,10 @@ def issue_token_pair(db: Session, user: User) -> tuple[str, str]:
 
 
 def rotate_refresh_token(db: Session, raw_token: str) -> tuple[User, str, str]:
-    """Validate a refresh token, revoke it, and issue a fresh pair.
+    """Validate and rotate a refresh token, returning a fresh pair.
 
-    If a revoked token is presented again, every active token for that user
-    is revoked: a replayed token means it leaked, so the whole session
-    family is treated as compromised.
+    An already-revoked token presented again trips reuse detection: all of the
+    user's active tokens are revoked, since replay implies the token leaked.
     """
     now = datetime.now(UTC)
     stored = db.scalar(
@@ -106,7 +105,7 @@ def rotate_refresh_token(db: Session, raw_token: str) -> tuple[User, str, str]:
 
 
 def revoke_refresh_token(db: Session, user: User, raw_token: str) -> None:
-    """Logout. Succeeds silently even for unknown tokens - no oracle."""
+    """Revoke a refresh token; silent on unknown tokens to avoid an oracle."""
     stored = db.scalar(
         select(RefreshToken).where(
             RefreshToken.token_hash == hash_refresh_token(raw_token),

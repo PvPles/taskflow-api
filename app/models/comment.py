@@ -15,9 +15,8 @@ class Comment(Base):
     task_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"))
     author_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     body: Mapped[str] = mapped_column(Text)
-    # Python-side default (not just server_default): comment ordering compares
-    # created_at, which needs microsecond precision and an identical storage
-    # format on SQLite - CURRENT_TIMESTAMP has neither. Mirrors Task.created_at.
+    # Application-side default, as on Task.created_at: ordering compares
+    # created_at, and SQLite's CURRENT_TIMESTAMP is only second-grained.
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),

@@ -11,8 +11,8 @@ logger = logging.getLogger("taskflow.access")
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):
-    """Assigns a request ID, times the request, and emits one structured
-    log line per request (the CloudWatch access log)."""
+    """Assign a request ID, time the request, and emit one structured log
+    line per request."""
 
     async def dispatch(self, request: Request, call_next):
         request_id = request.headers.get("x-request-id") or uuid.uuid4().hex

@@ -49,7 +49,7 @@ def get_task_for_member(db: Session, task_id: uuid.UUID, user: User) -> tuple[Pr
     task = db.get(Task, task_id)
     if task is None:
         raise APIError(404, "task_not_found", "Task not found")
-    # Raises the project 404 for non-members, so outsiders learn nothing.
+    # Non-members get the project 404, not a task 404 (no existence leak).
     project = get_project_for_member(db, task.project_id, user)
     return project, task
 

@@ -14,8 +14,7 @@ class TaskStatus(enum.StrEnum):
     done = "done"
 
 
-# A done task must be reopened (moved back to todo) before it can be
-# in_progress again; that's the whole point of the transition table.
+# A done task must be reopened (todo) before it can return to in_progress.
 ALLOWED_TRANSITIONS: dict[str, set[str]] = {
     TaskStatus.todo.value: {TaskStatus.in_progress.value, TaskStatus.done.value},
     TaskStatus.in_progress.value: {TaskStatus.todo.value, TaskStatus.done.value},
@@ -42,9 +41,8 @@ class Task(Base):
     )
     due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
-    # Python-side default (not just server_default): the pagination cursor
-    # compares created_at for equality, which needs microsecond precision and
-    # an identical storage format on SQLite - CURRENT_TIMESTAMP has neither.
+    # Application-side default: the keyset cursor compares created_at, which
+    # needs sub-second precision; SQLite's CURRENT_TIMESTAMP is second-grained.
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),

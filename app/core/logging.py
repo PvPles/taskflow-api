@@ -1,8 +1,7 @@
 """Structured JSON logging.
 
-Every log line is a single JSON object so CloudWatch (or any log
-aggregator) can parse fields without regex gymnastics. Extra fields
-passed via ``logger.info(..., extra={...})`` are merged into the line.
+Each record is serialized as a single JSON object. Fields passed via
+``logger.info(..., extra={...})`` are merged into the object.
 """
 
 import json

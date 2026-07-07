@@ -1,8 +1,7 @@
-"""Per-user rate limiting via a token bucket.
+"""Per-user token-bucket rate limiting.
 
-Buckets live in process memory: right-sized for a single-instance deployment
-(this app's target). Scaling to multiple instances would move the buckets to
-Redis; the interface below would not change.
+Buckets are held in process memory, which suits a single-instance deployment.
+Running multiple instances would require shared bucket state.
 """
 
 import math
