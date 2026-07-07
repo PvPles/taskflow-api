@@ -1,7 +1,7 @@
 # Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
 
 aws_region = "eu-central-1"
-app_image  = "ghcr.io/YOUR_GITHUB/taskflow-api:latest"
+app_image  = "ghcr.io/pvples/taskflow-api:latest"
 
 # Optional - HTTPS via ACM (requires a domain in Route53):
 # domain_name     = "api.example.com"

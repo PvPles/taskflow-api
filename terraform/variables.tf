@@ -13,7 +13,7 @@ variable "instance_type" {
 variable "app_image" {
   description = "Docker image for the API (published by CI to GHCR)"
   type        = string
-  default     = "ghcr.io/YOUR_GITHUB/taskflow-api:latest"
+  default     = "ghcr.io/pvples/taskflow-api:latest"
 }
 
 variable "domain_name" {

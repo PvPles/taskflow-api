@@ -53,10 +53,10 @@ def create_app() -> FastAPI:
         "pagination, and observability.",
         description=API_DESCRIPTION,
         openapi_tags=TAGS_METADATA,
-        contact={"name": "TaskFlow API", "url": "https://github.com/YOUR_GITHUB/taskflow-api"},
+        contact={"name": "TaskFlow API", "url": "https://github.com/PvPles/taskflow-api"},
         license_info={
             "name": "MIT",
-            "url": "https://github.com/YOUR_GITHUB/taskflow-api/blob/main/LICENSE",
+            "url": "https://github.com/PvPles/taskflow-api/blob/main/LICENSE",
         },
     )
     # Middleware runs outermost-last-added: RequestContext wraps RateLimit,

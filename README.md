@@ -4,7 +4,7 @@ A task/project management REST API (teams, projects, tasks, comments) built to
 show **production discipline in a small, honest codebase** — the product is
 deliberately boring so the engineering can be the point.
 
-[![CI](https://github.com/YOUR_GITHUB/taskflow-api/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB/taskflow-api/actions)
+[![CI](https://github.com/PvPles/taskflow-api/actions/workflows/ci.yml/badge.svg)](https://github.com/PvPles/taskflow-api/actions)
 
 ## Highlights
 
