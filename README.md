@@ -169,10 +169,6 @@ It's built to be stood up when needed and torn down after, not left running.
 On a new AWS account it costs roughly €1–2/month (t3.micro and the ALB are
 free-tier for a year); at full price it's about €26/month, mostly the ALB.
 
-## Live demo
-
-<!-- screenshots go here after a deploy run -->
-
 ## Some decisions worth explaining
 
 - **Sync SQLAlchemy, not async.** The code and tests are simpler, and this
